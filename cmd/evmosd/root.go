@@ -50,6 +50,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
+	cronoscfg "github.com/crypto-org-chain/cronos/v2/app/config"
 
 	evmosclient "github.com/evmos/evmos/v12/client"
 	"github.com/evmos/evmos/v12/client/debug"
@@ -231,7 +232,10 @@ func initAppConfig() (string, interface{}) {
 	srvCfg.StateSync.SnapshotKeepRecent = 2
 	srvCfg.IAVLDisableFastNode = false
 
-	return customAppTemplate, srvCfg
+	return customAppTemplate, srvCfg + cronoscfg.Config{
+		Config:  srvCfg,
+		MemIAVL: cronoscfg.DefaultMemIAVLConfig(),
+	}
 }
 
 type appCreator struct {
