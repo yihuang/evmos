@@ -15,6 +15,8 @@
 // along with the Evmos packages. If not, see https://github.com/evmos/evmos/blob/main/LICENSE
 package config
 
+import "github.com/evmos/evmos/v12/server/config/memiavl"
+
 // DefaultConfigTemplate defines the configuration template for the EVM RPC configuration
 const DefaultConfigTemplate = `
 ###############################################################################
@@ -106,4 +108,4 @@ certificate-path = "{{ .TLS.CertificatePath }}"
 
 # Key path defines the key.pem file path for the TLS configuration.
 key-path = "{{ .TLS.KeyPath }}"
-`
+` + memiavl.DefaultConfigTemplate

@@ -50,7 +50,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
-	cronoscfg "github.com/crypto-org-chain/cronos/v2/app/config"
 
 	evmosclient "github.com/evmos/evmos/v12/client"
 	"github.com/evmos/evmos/v12/client/debug"
@@ -83,8 +82,8 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		WithBroadcastMode(flags.BroadcastBlock).
 		WithHomeDir(app.DefaultNodeHome).
 		WithKeyringOptions(evmoskr.Option()).
-		WithViper(EnvPrefix).
-		WithLedgerHasProtobuf(true)
+		WithViper(EnvPrefix)
+		// WithLedgerHasProtobuf(true)
 
 	eip712.SetEncodingConfig(encodingConfig)
 
@@ -144,6 +143,11 @@ func NewRootCmd() (*cobra.Command, params.EncodingConfig) {
 		a.appExport,
 		addModuleInitFlags,
 	)
+
+	changeSetCmd := ChangeSetCmd()
+	if changeSetCmd != nil {
+		rootCmd.AddCommand(changeSetCmd)
+	}
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
@@ -232,10 +236,7 @@ func initAppConfig() (string, interface{}) {
 	srvCfg.StateSync.SnapshotKeepRecent = 2
 	srvCfg.IAVLDisableFastNode = false
 
-	return customAppTemplate, srvCfg + cronoscfg.Config{
-		Config:  srvCfg,
-		MemIAVL: cronoscfg.DefaultMemIAVLConfig(),
-	}
+	return customAppTemplate, srvCfg
 }
 
 type appCreator struct {

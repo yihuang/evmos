@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/evmos/evmos/v12/server/config/memiavl"
 	"github.com/tendermint/tendermint/libs/strings"
 
 	errorsmod "cosmossdk.io/errors"
@@ -93,9 +94,10 @@ var evmTracers = []string{"json", "markdown", "struct", "access_list"}
 type Config struct {
 	config.Config
 
-	EVM     EVMConfig     `mapstructure:"evm"`
-	JSONRPC JSONRPCConfig `mapstructure:"json-rpc"`
-	TLS     TLSConfig     `mapstructure:"tls"`
+	EVM     EVMConfig             `mapstructure:"evm"`
+	JSONRPC JSONRPCConfig         `mapstructure:"json-rpc"`
+	TLS     TLSConfig             `mapstructure:"tls"`
+	MemIAVL memiavl.MemIAVLConfig `mapstructure:"memiavl"`
 }
 
 // EVMConfig defines the application configuration values for the EVM.
@@ -185,6 +187,7 @@ func AppConfig(denom string) (string, interface{}) {
 		EVM:     *DefaultEVMConfig(),
 		JSONRPC: *DefaultJSONRPCConfig(),
 		TLS:     *DefaultTLSConfig(),
+		MemIAVL: memiavl.DefaultMemIAVLConfig(),
 	}
 
 	customAppTemplate := config.DefaultConfigTemplate + DefaultConfigTemplate
@@ -199,6 +202,7 @@ func DefaultConfig() *Config {
 		EVM:     *DefaultEVMConfig(),
 		JSONRPC: *DefaultJSONRPCConfig(),
 		TLS:     *DefaultTLSConfig(),
+		MemIAVL: memiavl.DefaultMemIAVLConfig(),
 	}
 }
 

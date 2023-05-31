@@ -358,6 +358,8 @@ func NewEvmos(
 
 	eip712.SetEncodingConfig(encodingConfig)
 
+	baseAppOptions = SetupMemIAVL(logger, homePath, appOpts, baseAppOptions)
+
 	// NOTE we use custom transaction decoder that supports the sdk.Tx interface instead of sdk.StdTx
 	bApp := baseapp.NewBaseApp(
 		Name,
@@ -370,28 +372,7 @@ func NewEvmos(
 	bApp.SetVersion(version.Version)
 	bApp.SetInterfaceRegistry(interfaceRegistry)
 
-	keys := sdk.NewKVStoreKeys(
-		// SDK keys
-		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
-		distrtypes.StoreKey, slashingtypes.StoreKey,
-		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey,
-		evidencetypes.StoreKey, capabilitytypes.StoreKey,
-		feegrant.StoreKey, authzkeeper.StoreKey,
-		// ibc keys
-		ibchost.StoreKey, ibctransfertypes.StoreKey,
-		// ica keys
-		icahosttypes.StoreKey,
-		// ethermint keys
-		evmtypes.StoreKey, feemarkettypes.StoreKey,
-		// evmos keys
-		inflationtypes.StoreKey, erc20types.StoreKey, incentivestypes.StoreKey,
-		epochstypes.StoreKey, claimstypes.StoreKey, vestingtypes.StoreKey,
-		revenuetypes.StoreKey, recoverytypes.StoreKey,
-	)
-
-	// Add the EVM transient store key
-	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
-	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	keys, memKeys, tkeys := StoreKeys()
 
 	// wire up the versiondb's `StreamingService` and `MultiStore`.
 	streamers := cast.ToStringSlice(appOpts.Get("store.streamers"))
@@ -1287,4 +1268,35 @@ func (app *Evmos) setupUpgradeHandlers() {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, storeUpgrades))
 	}
+}
+
+func StoreKeys() (
+	map[string]*storetypes.KVStoreKey,
+	map[string]*storetypes.MemoryStoreKey,
+	map[string]*storetypes.TransientStoreKey,
+) {
+	keys := sdk.NewKVStoreKeys(
+		// SDK keys
+		authtypes.StoreKey, banktypes.StoreKey, stakingtypes.StoreKey,
+		distrtypes.StoreKey, slashingtypes.StoreKey,
+		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey,
+		evidencetypes.StoreKey, capabilitytypes.StoreKey,
+		feegrant.StoreKey, authzkeeper.StoreKey,
+		// ibc keys
+		ibchost.StoreKey, ibctransfertypes.StoreKey,
+		// ica keys
+		icahosttypes.StoreKey,
+		// ethermint keys
+		evmtypes.StoreKey, feemarkettypes.StoreKey,
+		// evmos keys
+		inflationtypes.StoreKey, erc20types.StoreKey, incentivestypes.StoreKey,
+		epochstypes.StoreKey, claimstypes.StoreKey, vestingtypes.StoreKey,
+		revenuetypes.StoreKey, recoverytypes.StoreKey,
+	)
+
+	// Add the EVM transient store key
+	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey, evmtypes.TransientKey, feemarkettypes.TransientKey)
+	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+
+	return keys, memKeys, tkeys
 }
