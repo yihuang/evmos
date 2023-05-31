@@ -179,6 +179,8 @@ import (
 	"github.com/evmos/evmos/v12/x/ibc/transfer"
 	transferkeeper "github.com/evmos/evmos/v12/x/ibc/transfer/keeper"
 
+	memiavlrootmulti "github.com/crypto-org-chain/cronos/store/rootmulti"
+
 	// Force-load the tracer engines to trigger registration due to Go-Ethereum v1.10.15 changes
 	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
 	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
@@ -1268,6 +1270,15 @@ func (app *Evmos) setupUpgradeHandlers() {
 		// configure store loader that checks if version == upgradeHeight and applies store upgrades
 		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, storeUpgrades))
 	}
+}
+
+// Close will be called in graceful shutdown in start cmd
+func (app *Evmos) Close() error {
+	if cms, ok := app.CommitMultiStore().(*memiavlrootmulti.Store); ok {
+		return cms.WaitAsyncCommit()
+	}
+
+	return nil
 }
 
 func StoreKeys() (
